@@ -28,7 +28,6 @@ from multi_agent_research_lab.observability.logging import configure_logging  # 
 from multi_agent_research_lab.observability.tracing import (  # noqa: E402
     flush,
     get_langfuse_client,
-    init_trace,
     update_span,
 )
 from multi_agent_research_lab.services.llm_client import LLMClient  # noqa: E402
@@ -84,12 +83,7 @@ def baseline(
     _init()
     request = _parse_query(query)
 
-    init_trace(
-        name="baseline-run",
-        input={"query": query},
-        tags=["baseline"],
-    )
-    update_span(name="baseline-run", input={"query": query})
+    update_span(name="baseline-run", input={"query": query}, metadata={"tags": ["baseline"]})
 
     system_prompt = (
         "You are a knowledgeable research assistant. "
@@ -142,12 +136,7 @@ def multi_agent(
     """Run the full multi-agent supervisor → researcher → analyst → writer workflow."""
     _init()
 
-    init_trace(
-        name="multi-agent-run",
-        input={"query": query},
-        tags=["multi-agent"],
-    )
-    update_span(name="multi-agent-run", input={"query": query})
+    update_span(name="multi-agent-run", input={"query": query}, metadata={"tags": ["multi-agent"]})
 
     state = ResearchState(request=_parse_query(query))
     workflow = MultiAgentWorkflow()
@@ -226,7 +215,7 @@ def benchmark(
     from multi_agent_research_lab.evaluation.report import render_markdown_report
 
     _init()
-    init_trace(name="benchmark-run", tags=["benchmark"])
+    update_span(name="benchmark-run", metadata={"tags": ["benchmark"]})
 
     console.print("[bold]Running benchmark...[/bold]")
     all_metrics = []

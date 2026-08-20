@@ -76,31 +76,13 @@ def get_langfuse_client() -> Langfuse | None:
 
 
 
-def init_trace(
-    name: str,
-    input: dict[str, Any] | None = None,  # noqa: A002
-    session_id: str | None = None,
-    tags: list[str] | None = None,
-) -> None:
-    """Set trace-level metadata from inside an @observe-decorated function."""
-    if not _LANGFUSE_AVAILABLE:
-        return
-    client = get_langfuse_client()
-    if client is None:
-        return
-    kwargs: dict[str, Any] = {"name": name}
-    if input is not None:
-        kwargs["input"] = input
-    client.set_current_trace_io(**{k: v for k, v in kwargs.items() if k in ("input",)})
-
-
 def update_span(
     name: str | None = None,
     input: Any = None,  # noqa: A002
     output: Any = None,
     metadata: dict[str, Any] | None = None,
 ) -> None:
-    """Enrich the current @observe span with extra context."""
+    """Enrich the current @observe span/generation with extra context."""
     if not _LANGFUSE_AVAILABLE:
         return
     client = get_langfuse_client()
@@ -117,6 +99,7 @@ def update_span(
         kwargs["metadata"] = metadata
     if kwargs:
         client.update_current_span(**kwargs)
+
 
 
 def flush() -> None:

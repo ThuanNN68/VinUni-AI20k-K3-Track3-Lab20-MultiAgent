@@ -41,7 +41,7 @@ class AnalystAgent(BaseAgent):
     def __init__(self) -> None:
         self._llm = LLMClient()
 
-    @observe(name="analyst-agent")
+    @observe(name="analyst-agent", as_type="agent")
     def run(self, state: ResearchState) -> ResearchState:
         """Populate ``state.analysis_notes``."""
         update_span(

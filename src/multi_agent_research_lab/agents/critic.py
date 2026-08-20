@@ -38,7 +38,7 @@ class CriticAgent(BaseAgent):
     def __init__(self) -> None:
         self._llm = LLMClient()
 
-    @observe(name="critic-agent")
+    @observe(name="critic-agent", as_type="agent")
     def run(self, state: ResearchState) -> ResearchState:
         """Validate final answer and append evaluation findings to agent results."""
         update_span(

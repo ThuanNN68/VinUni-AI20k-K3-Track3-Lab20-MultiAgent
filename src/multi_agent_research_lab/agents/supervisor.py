@@ -43,7 +43,7 @@ class SupervisorAgent(BaseAgent):
     def __init__(self) -> None:
         self._max_iterations = get_settings().max_iterations
 
-    @observe(name="supervisor-agent")
+    @observe(name="supervisor-agent", as_type="agent")
     def run(self, state: ResearchState) -> ResearchState:
         """Update ``state.route_history`` with the next route and return state."""
         update_span(

@@ -25,7 +25,7 @@ llm = [
   "langgraph>=0.2",
   "langchain-core>=0.2",
   "langsmith>=0.1",
-  "langfuse>=3.0",
+  "langfuse>=4.0",
   "tavily-python>=0.3"
 ]
 dev = [

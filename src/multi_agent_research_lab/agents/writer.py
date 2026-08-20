@@ -35,7 +35,7 @@ class WriterAgent(BaseAgent):
     def __init__(self) -> None:
         self._llm = LLMClient()
 
-    @observe(name="writer-agent")
+    @observe(name="writer-agent", as_type="agent")
     def run(self, state: ResearchState) -> ResearchState:
         """Populate ``state.final_answer`` with a cited response."""
         update_span(

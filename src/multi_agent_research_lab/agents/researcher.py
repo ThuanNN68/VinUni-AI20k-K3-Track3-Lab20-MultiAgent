@@ -33,7 +33,7 @@ class ResearcherAgent(BaseAgent):
         self._search = SearchClient()
         self._llm = LLMClient()
 
-    @observe(name="researcher-agent")
+    @observe(name="researcher-agent", as_type="agent")
     def run(self, state: ResearchState) -> ResearchState:
         """Populate ``state.sources`` and ``state.research_notes``."""
         query = state.request.query
