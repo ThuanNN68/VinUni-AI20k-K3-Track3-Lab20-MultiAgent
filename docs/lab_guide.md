@@ -113,5 +113,11 @@ Cách khắc phục (chọn 1 trong 3):
 
 Mỗi nhóm trả lời 2 câu:
 
-1. Case nào nên dùng multi-agent? Vì sao?
-2. Case nào không nên dùng multi-agent? Vì sao?
+1. **Case nào nên dùng multi-agent? Vì sao?**
+   - **Các tác vụ nghiên cứu chuyên sâu, phức tạp (Deep Research & Multi-step Analysis)**: Khi câu hỏi yêu cầu thu thập thông tin từ nhiều nguồn ngoài (Web Search / Knowledge Base), thẩm định - so sánh độ tin cậy của các luồng thông tin mâu thuẫn (Analyst), và tổng hợp câu trả lời chuẩn xác có trích dẫn nguồn (Writer).
+   - **Lý do**: Chia nhỏ trách nhiệm (Separation of Concerns) giúp mỗi agent tập trung vào một prompt chuyên biệt, giảm thiểu hiện tượng quá tải context và hallucination, đồng thời cho phép kiểm soát chất lượng trung gian (intermediate verification & routing) dễ dàng.
+
+2. **Case nào không nên dùng multi-agent? Vì sao?**
+   - **Các tác vụ đơn giản, phản hồi thời gian thực (Low Latency / Direct QA / Code Completion / Simple Summarization)**: Khi câu hỏi mang tính kiến thức chung hoặc có sẵn trong context ngắn.
+   - **Lý do**: Multi-agent làm tăng đáng kể độ trễ (latency cao gấp 4-5 lần do nhiều lượt gọi LLM tuần tự), tăng chi phí token (~6-8 lần), và tăng độ phức tạp trong bảo trì hệ thống (rủi ro routing loop, failure cascading). Single-agent với prompt tốt hoặc RAG cơ bản sẽ tối ưu hơn nhiều về cost/latency.
+
