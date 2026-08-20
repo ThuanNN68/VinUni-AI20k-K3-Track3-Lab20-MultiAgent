@@ -53,25 +53,26 @@ The heuristic quality score shows a clear advantage for multi-agent:
 
 ## Trace Observability
 
+- **Live Langfuse Trace**: [Tracing | Langfuse Project Trace `5d09dd12...`](https://cloud.langfuse.com/project/cmt13h9o50cmaad0ihhmu57sm/traces?peek=af7400bc4667a0e4&observation=af7400bc4667a0e4&traceId=5d09dd1264a8f1a6744fbdbe3211571f&timestamp=2026-08-20T07%3A47%3A51.197Z)
+- **Trace Snapshot**:
+  ![Langfuse Multi-Agent Trace](langfuse_trace.png)
+
 Each multi-agent run produces a **Langfuse trace** with the following span hierarchy:
 ```
-multi-agent-run (trace)
-├── supervisor-agent (span, as_type=agent)     → decides: researcher
-├── researcher-agent (span, as_type=agent)
-│   └── openai.chat.completions (generation)  → researcher-synthesis
-├── supervisor-agent                           → decides: analyst
-├── analyst-agent (span, as_type=agent)
-│   └── openai.chat.completions (generation)  → analyst-analysis
-├── supervisor-agent                           → decides: writer
-├── writer-agent (span, as_type=agent)
-│   └── openai.chat.completions (generation)  → writer-synthesis
-└── supervisor-agent                           → decides: done
+offline-multi-agent-run (trace: latency 25.62s | cost $0.001167)
+├── supervisor-agent (0.00s)                  -> decides: researcher
+├── researcher-agent (5.85s | $0.000268)
+│   └── openai.chat.completions (3.88s)       -> researcher-synthesis
+├── supervisor-agent (0.01s)                  -> decides: analyst
+├── analyst-agent (4.15s | $0.000257)
+│   └── openai.chat.completions (4.14s)       -> analyst-analysis
+├── supervisor-agent (0.00s)                  -> decides: writer
+├── writer-agent (11.02s | $0.000642)
+│   └── openai.chat.completions (11.02s)      -> writer-synthesis
+└── supervisor-agent (0.00s)                  -> decides: done
 ```
-Each generation captures: model, input/output tokens, cost, latency.
+Each generation captures: model, input/output tokens (total 4,097 tokens), cost, latency.
 Each agent span captures: input state summary, output metrics, metadata.
-
-> **Note**: Requires valid `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` in `.env`.
-> The application runs successfully without valid keys — tracing is gracefully disabled.
 
 ---
 

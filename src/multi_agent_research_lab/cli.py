@@ -133,7 +133,7 @@ def baseline(
 def multi_agent(
     query: Annotated[str, typer.Option("--query", "-q", help="Research query")],
 ) -> None:
-    """Run the full multi-agent supervisor → researcher → analyst → writer workflow."""
+    """Run the full multi-agent supervisor -> researcher -> analyst -> writer workflow."""
     _init()
 
     update_span(name="multi-agent-run", input={"query": query}, metadata={"tags": ["multi-agent"]})
@@ -169,7 +169,7 @@ def multi_agent(
 
     # Display results
     console.print(Panel.fit(result.final_answer or "(no answer)", title="[green]Final Answer"))
-    console.print(f"\n[dim]Route:[/dim] {' → '.join(result.route_history)}")
+    console.print(f"\n[dim]Route:[/dim] {' -> '.join(result.route_history)}")
 
     tbl = Table(title="Multi-Agent Metrics", show_header=True)
     tbl.add_column("Metric")
@@ -261,7 +261,7 @@ def benchmark(
     out_path = Path(output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(report, encoding="utf-8")
-    console.print(f"\n[green]Report written → {out_path}[/green]")
+    console.print(f"\n[green]Report written -> {out_path}[/green]")
     flush()
 
 
@@ -353,7 +353,7 @@ def offline_research(
     console.print(
         Panel.fit(result.final_answer or "(no answer)", title="[green]Offline Research Report")
     )
-    console.print(f"\n[dim]Route:[/dim] {' → '.join(result.route_history)}")
+    console.print(f"\n[dim]Route:[/dim] {' -> '.join(result.route_history)}")
 
 
     tbl = Table(title="Offline Multi-Agent Metrics", show_header=True)
