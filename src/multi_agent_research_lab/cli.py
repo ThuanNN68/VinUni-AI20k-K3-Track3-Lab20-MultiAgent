@@ -265,6 +265,112 @@ def benchmark(
     flush()
 
 
+# ---------------------------------------------------------------------------
+# Offline Corpus Commands
+# ---------------------------------------------------------------------------
+
+
+@app.command("list-topics")
+def list_topics() -> None:
+    """List all available topics in the 30-topic offline research corpus."""
+    from multi_agent_research_lab.services.search_client import SearchClient
+
+    client = SearchClient()
+    topics = client.list_topics()
+
+    if not topics:
+        console.print("[yellow]No offline topics found in data/corpus/topics[/yellow]")
+        return
+
+    tbl = Table(title=f"Offline Research Corpus ({len(topics)} Topics)", show_header=True)
+    tbl.add_column("#", justify="right", style="cyan")
+    tbl.add_column("ID", style="bold")
+    tbl.add_column("Topic Name", style="green")
+    tbl.add_column("Research Question")
+
+    for i, t in enumerate(topics, 1):
+        tbl.add_row(str(i), t["id"], t["name"], t["question"][:80] + "...")
+
+    console.print(tbl)
+
+
+@app.command("offline")
+@observe(name="offline-multi-agent-run")
+def offline_research(
+    topic: Annotated[
+        str,
+        typer.Option(
+            "--topic",
+            "-t",
+            help="Topic number (1-30), ID (e.g. AIAGENT-01), or query keyword",
+        ),
+    ] = "1",
+) -> None:
+    """Run multi-agent research using knowledge strictly from the offline corpus."""
+    from multi_agent_research_lab.services.search_client import SearchClient
+
+    _init()
+    client = SearchClient()
+    topics = client.list_topics()
+
+    selected_query = topic
+    # Check if topic is a number
+    if topic.isdigit():
+        idx = int(topic) - 1
+        if 0 <= idx < len(topics):
+            selected_query = topics[idx]["question"] or topics[idx]["name"]
+            topic_name = topics[idx]["name"]
+            console.print(f"[bold green]Selected Topic #{topic}:[/bold green] {topic_name}")
+    else:
+        # Match by ID or name
+        for t in topics:
+            if topic.lower() in t["id"].lower() or topic.lower() in t["name"].lower():
+                selected_query = t["question"] or t["name"]
+                console.print(f"[bold green]Matched Topic ({t['id']}):[/bold green] {t['name']}")
+                break
+
+    console.print(f"[cyan]Research Question:[/cyan] {selected_query}\n")
+
+    # Run multi-agent pipeline with offline corpus
+    update_span(name="offline-multi-agent-run", input={"query": selected_query, "mode": "offline"})
+
+    state = ResearchState(request=_parse_query(selected_query))
+    workflow = MultiAgentWorkflow()
+    try:
+        t0 = time.perf_counter()
+        result = workflow.run(state)
+        latency = time.perf_counter() - t0
+    except StudentTodoError as exc:
+        console.print(Panel.fit(str(exc), title="Expected TODO", style="yellow"))
+        raise typer.Exit(code=2) from exc
+
+    total_in = sum(r.metadata.get("input_tokens") or 0 for r in result.agent_results)
+    total_out = sum(r.metadata.get("output_tokens") or 0 for r in result.agent_results)
+    total_cost = sum(r.metadata.get("cost_usd") or 0.0 for r in result.agent_results)
+    writer_res = next((r for r in result.agent_results if r.agent == "writer"), None)
+    citation_cov = writer_res.metadata.get("citation_coverage") if writer_res else None
+
+    console.print(
+        Panel.fit(result.final_answer or "(no answer)", title="[green]Offline Research Report")
+    )
+    console.print(f"\n[dim]Route:[/dim] {' → '.join(result.route_history)}")
+
+
+    tbl = Table(title="Offline Multi-Agent Metrics", show_header=True)
+    tbl.add_column("Metric")
+    tbl.add_column("Value", justify="right")
+    tbl.add_row("Latency", f"{latency:.2f}s")
+    tbl.add_row("Corpus Sources Retrieved", str(len(result.sources)))
+    tbl.add_row("Total input tokens", str(total_in))
+    tbl.add_row("Total output tokens", str(total_out))
+    tbl.add_row("Est. total cost", f"${total_cost:.5f}")
+    tbl.add_row("Citation coverage", f"{citation_cov:.0%}" if citation_cov is not None else "-")
+    console.print(tbl)
+
+    flush()
+
+
 if __name__ == "__main__":
     app()
+
 
